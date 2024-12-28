@@ -1,14 +1,18 @@
 import Table from "react-bootstrap/Table";
 
+/**
+ * 
+ */
 interface Props {
     columns: string[],
     data: string[][]
 }
 
+/**
+ * 
+ */
 export default function DataTable({ columns, data }: Props) {
-
-
-
+    
     return (
         <Table striped bordered variant="dark">
             <thead>
@@ -21,7 +25,7 @@ export default function DataTable({ columns, data }: Props) {
             </thead>
             <tbody>
             {data.map((row, rIndex) => (
-                <tr>
+                <tr key={rIndex}>
                     <td>{rIndex + 1}</td>
                     {row.map((item, cIndex) => ( 
                         <td key={cIndex}>{item}</td>
