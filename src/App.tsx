@@ -3,7 +3,19 @@ import Stack from 'react-bootstrap/Stack'
 import DataTable from './components/DataTable'
 import ConnectionForm from './components/ConnectionForm'
 import { useConnectDatabase } from './hooks/useConnectDatabase'
-import { Alert, Button, ButtonGroup } from 'react-bootstrap'
+import { Alert, Button, ButtonGroup, Modal } from 'react-bootstrap'
+import { useFetchJSON } from './hooks/useFetchJSON'
+import ControlGroup from './components/ControlGroup'
+import ModalForm from './components/ModalForm'
+
+/**
+ * 
+ */
+interface TableData {
+  name: string,
+  columns: string[],
+  data: string[][]
+}
 
 /**
  * 
@@ -11,7 +23,10 @@ import { Alert, Button, ButtonGroup } from 'react-bootstrap'
 function App() {
 
   const [connection, connectDatabase] = useConnectDatabase();
-  const [selectedTable, setSelectedTable] = useState<string | null>(null);
+  const [fetchJSON] = useFetchJSON();
+  const [tableData, setTableData] = useState<TableData | null>(null);
+  const [isVisible, setIsVisible] = useState<boolean>(false);
+
 
   /**
    * 
@@ -22,31 +37,51 @@ function App() {
     connectDatabase(address);
   };
 
+  /**
+   * 
+   * @param table 
+   */
+  const onTableRequested = async (table: string) => {
+    if (connection === null) {
+      return;
+    }
+
+    const sqlQuery = `SELECT * FROM ${table}`;
+    const data = await fetchJSON(connection.address, 'POST', sqlQuery);
+    setTableData({
+      name: table,
+      columns: data.columns,
+      data: data.data
+    });
+  };
+
   return (
-    <Stack>
+    <div>
       <ConnectionForm onSubmit={onConnect}/>
       {connection ? (
         <div>
-          <ButtonGroup>
-            <Button variant='secondary'>Create</Button>
-            <Button variant='primary'>Insert</Button>
-            <Button variant='primary'>Update</Button>
-            <Button variant='danger'>Delete</Button>
-            <Button variant='danger'>Drop</Button>
-          </ButtonGroup>
-
-          <h4>Tables</h4>
-          <ButtonGroup>
-          {connection.tables.map((table, index) =>(
-            <Button key={index} onClick={() => setSelectedTable(table)}>{table}</Button>
-          ))}
-          </ButtonGroup>
-          
-          {selectedTable ? (
+          <div className='d-flex justify-content-between mt-3'>
+            <ButtonGroup>
+            {connection.tables.map((table, index) =>(
+              <Button key={index} 
+                      disabled={tableData !== null && table === tableData.name}
+                      onClick={() => onTableRequested(table)}
+              >{table}</Button>
+            ))}
+            </ButtonGroup>
+            {tableData ? <ControlGroup onControlClick={() => setIsVisible(true)}/> : <></>}
+          </div>
+                    
+          {tableData ? (
             <div>
-              <h4>{selectedTable}</h4>
-              <DataTable columns={["id", "name", "age"]} 
-                         data={[["0", "Person 1", "30"], ["1", "Person 2", "45"]]}
+              <h4>{tableData.name}</h4>
+              <DataTable columns={tableData.columns} 
+                        data={tableData.data}
+              />
+              <ModalForm title='ModalForm'
+                         form={<p>Hello</p>}
+                         isVisible={isVisible}
+                         onHide={() => setIsVisible(false)}
               />
             </div>
           ) : <></>}
@@ -54,7 +89,7 @@ function App() {
       ) : (
         <Alert>Not connected to a database!</Alert>
       )}
-    </Stack>
+    </div>
   );
 }
 

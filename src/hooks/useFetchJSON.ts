@@ -8,15 +8,19 @@ type Method = "GET" | "POST"
 /**
  * 
  */
-export function useFetch() {
+export function useFetchJSON() {
 
     const abortControllerRef = useRef<AbortController | null>(null);
 
     /**
      * 
      * @param address 
+     * @param method
+     * @param body
+     * @param mode
+     * @returns
      */
-    const fetchHandler = async (url: string, method: Method, mode: RequestMode = 'cors') => {
+    const fetchHandler = async (url: string, method: Method = 'GET', body: BodyInit | null = null, mode: RequestMode = 'cors') => {
         if (abortControllerRef.current !== null) {
             abortControllerRef.current.abort();
         }
@@ -25,6 +29,7 @@ export function useFetch() {
         const response = await fetch(url, {
             method: method,
             mode: mode,
+            body: body,
             signal: abortControllerRef.current.signal
         });
 

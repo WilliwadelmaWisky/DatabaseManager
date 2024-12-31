@@ -33,7 +33,7 @@ export default function ConnectionForm({ onSubmit }: Props) {
      */
     const submitHandler = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        onSubmit(`localhost:${port}`);
+        onSubmit(`http://localhost:${port}`);
     };
 
     return (
