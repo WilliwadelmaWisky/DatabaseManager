@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import Stack from 'react-bootstrap/Stack'
 import DataTable from './components/DataTable'
 import ConnectionForm from './components/ConnectionForm'
 import { useConnectDatabase } from './hooks/useConnectDatabase'
-import { Alert, Button, ButtonGroup, Modal } from 'react-bootstrap'
+import { Alert, Button, ButtonGroup } from 'react-bootstrap'
 import { useFetchJSON } from './hooks/useFetchJSON'
 import ControlGroup from './components/ControlGroup'
-import ModalForm from './components/ModalForm'
+import ModalForm from './components/forms/ModalForm'
+import TableList from './components/TableList'
 
 /**
  * 
@@ -26,6 +26,7 @@ function App() {
   const [fetchJSON] = useFetchJSON();
   const [tableData, setTableData] = useState<TableData | null>(null);
   const [isVisible, setIsVisible] = useState<boolean>(false);
+  const [content, setContent] = useState<JSX.Element | null>(null);
 
 
   /**
@@ -55,31 +56,33 @@ function App() {
     });
   };
 
+  /**
+   * 
+   * @param content 
+   */
+  const onControlClicked = (content: JSX.Element) => {
+    setContent(content);
+    setIsVisible(true);
+  };
+
   return (
     <div>
       <ConnectionForm onSubmit={onConnect}/>
       {connection ? (
         <div>
-          <div className='d-flex justify-content-between mt-3'>
-            <ButtonGroup>
-            {connection.tables.map((table, index) =>(
-              <Button key={index} 
-                      disabled={tableData !== null && table === tableData.name}
-                      onClick={() => onTableRequested(table)}
-              >{table}</Button>
-            ))}
-            </ButtonGroup>
-            {tableData ? <ControlGroup onControlClick={() => setIsVisible(true)}/> : <></>}
-          </div>
+          <TableList tables={connection.tables} 
+                     onSelect={onTableRequested}
+          />
+          {tableData ? <ControlGroup onControlClick={onControlClicked}/> : <></>}
                     
           {tableData ? (
             <div>
               <h4>{tableData.name}</h4>
               <DataTable columns={tableData.columns} 
-                        data={tableData.data}
+                         data={tableData.data}
               />
               <ModalForm title='ModalForm'
-                         form={<p>Hello</p>}
+                         form={content ? content : <p>NULL</p>}
                          isVisible={isVisible}
                          onHide={() => setIsVisible(false)}
               />
