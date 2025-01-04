@@ -1,13 +1,13 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import { Button, Col, Form, Row } from "react-bootstrap";
-import { ColumnData } from "./ColumnControl";
+import { TypeValue } from "./TypeValueControl";
 
 /**
  * 
  */
 interface Props {
     table: string,
-    columns: ColumnData[],
+    columns: TypeValue[],
     onSubmit: (sql: string) => void
 }
 
@@ -54,10 +54,10 @@ export default function InsertIntoForm({ table, columns, onSubmit }: Props) {
                 <Form.Group key={index} 
                             as={Row}
                             className="mb-3" 
-                            controlId={`InsertIntoTable.${column.name}`}
+                            controlId={`InsertIntoTable.${column.value}`}
                 >
                     <Col>
-                        <Form.Label>{column.name}</Form.Label>
+                        <Form.Label>{column.value}</Form.Label>
                     </Col>
                     <Col>
                         <Form.Control type="text" 

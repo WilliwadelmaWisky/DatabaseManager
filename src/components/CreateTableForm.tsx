@@ -1,27 +1,28 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { ColumnControl, ColumnData, Types } from "./ColumnControl";
+import { TypeValueControl, TypeValue } from "./TypeValueControl";
 
 /**
  * 
  */
 interface FormData {
     table: string
-    columns: ColumnData[]
+    columns: TypeValue[]
 }
 
 /**
  * 
  */
 interface Props {
+    types: readonly string[],
     onSubmit: (sql: string) => void
 }
 
 /**
  * 
  */
-export default function CreateTableForm({ onSubmit }: Props) {
+export default function CreateTableForm({ types, onSubmit }: Props) {
 
     const [formData, setFormData] = useState<FormData>({
         table: "",
@@ -44,18 +45,10 @@ export default function CreateTableForm({ onSubmit }: Props) {
      * @param e 
      * @param index
      */
-    const onColumnChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>, index: number) => {
-        const propertyName: string = e.target instanceof HTMLInputElement ? "name" : "type";
+    const onColumnChange = (typeValue: TypeValue, index: number) => {
         setFormData(prevState => ({
             ...prevState,
-            columns: prevState.columns.map((col, i) => {
-                if (index !== i)
-                    return col;
-                
-                let newCol = { ...col };
-                (newCol as any)[propertyName] = e.target.value;
-                return newCol;
-            })
+            columns: prevState.columns.map((col, i) => index === i ? typeValue : col)
         }));
     }
 
@@ -65,7 +58,7 @@ export default function CreateTableForm({ onSubmit }: Props) {
     const onAddColumn = () => {
         setFormData(prevState => ({
             ...prevState,
-            columns: [...prevState.columns, { type: Types.INT, name: "" }]
+            columns: [...prevState.columns, { typeIndex: 0, value: "" }]
         }));
     };
 
@@ -86,7 +79,7 @@ export default function CreateTableForm({ onSubmit }: Props) {
     const submitHandler = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
 
-        const sql = `CREATE TABLE ${formData.table} (${formData.columns.map(col => col.name + " " + Types[col.type]).join(", ")})`;
+        const sql = `CREATE TABLE ${formData.table} (${formData.columns.map(col => col.value + " " + types[col.typeIndex]).join(", ")})`;
         onSubmit(sql);
     };
 
@@ -102,10 +95,11 @@ export default function CreateTableForm({ onSubmit }: Props) {
             </Form.Group>
 
             <Form.Label>Columns</Form.Label>
-            {formData.columns.map((column, index) => (
-                <ColumnControl key={index} 
-                               value={column}
-                               onChange={e => onColumnChange(e, index)}
+            {formData.columns.map((_, index) => (
+                <TypeValueControl key={index} 
+                                  types={types}
+                                  defaultValue={{typeIndex: 0, value: ""}}
+                                  onChange={typeValue => onColumnChange(typeValue, index)}
                 />
             ))}
             <div className="d-flex justify-content-end gap-1">

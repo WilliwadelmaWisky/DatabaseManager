@@ -4,13 +4,13 @@ import ConnectionForm from './components/ConnectionForm'
 import { useConnectDatabase } from './hooks/useConnectDatabase'
 import { Alert, Button, ButtonGroup } from 'react-bootstrap'
 import { useFetchJSON } from './hooks/useFetchJSON'
-import ModalForm from './components/forms/ModalForm'
+import ModalForm from './components/ModalForm'
 import TableList from './components/TableList'
-import CreateTableForm from './components/forms/CreateTableForm'
-import InsertIntoForm from './components/forms/InsertIntoForm'
-import UpdateForm from './components/forms/UpdateForm'
-import DeleteForm from './components/forms/DeleteForm'
-import DropTableForm from './components/forms/DropTableForm'
+import CreateTableForm from './components/CreateTableForm'
+import InsertIntoForm from './components/InsertIntoForm'
+import UpdateForm from './components/UpdateForm'
+import DeleteForm from './components/DeleteForm'
+import DropTableForm from './components/DropTableForm'
 
 /**
  * 
@@ -26,6 +26,8 @@ interface ModalData {
   title: string,
   content: JSX.Element | null
 }
+
+const TYPES = Object.freeze([ "INT", "VARCHAR" ]);
 
 /**
  * 
@@ -89,9 +91,20 @@ function App() {
       {connection ? (
         <div>
           <ButtonGroup>
-            <Button variant='primary' onClick={() => onControlClicked("Create a new table", <CreateTableForm onSubmit={sql => console.log(sql)}/>)}>Create</Button>
+            <Button variant='primary' 
+                    onClick={() => onControlClicked("Create a new table", <CreateTableForm types={TYPES} onSubmit={sql => {
+                      console.log(sql);
+                      fetchJSON(connection.address, 'POST', sql);
+                      connectDatabase(connection.address);
+                    }}/>)}
+            >Create</Button>
             <Button variant='primary'>Alter</Button>
-            <Button variant='danger' onClick={() => onControlClicked("Drop a table", <DropTableForm tables={connection.tables} onSubmit={sql => console.log(sql)}/>)}>Drop</Button>
+            <Button variant='danger' 
+                    onClick={() => onControlClicked("Drop a table", <DropTableForm tables={connection.tables} onSubmit={sql => { 
+                      console.log(sql); 
+                      fetchJSON(connection.address, 'POST', sql);
+                      connectDatabase(connection.address);
+                    }}/>)}>Drop</Button>
           </ButtonGroup>
           <p></p>
           <TableList tables={connection.tables} 
