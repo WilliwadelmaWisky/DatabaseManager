@@ -5,7 +5,7 @@ import { useConnectDatabase } from './hooks/useConnectDatabase'
 import { Alert, Button, ButtonGroup } from 'react-bootstrap'
 import { useFetchJSON } from './hooks/useFetchJSON'
 import ModalForm from './components/ModalForm'
-import TableList from './components/TableList'
+import TableSelectionForm from './components/TableSelectionForm'
 import CreateTableForm from './components/CreateTableForm'
 import InsertIntoForm from './components/InsertIntoForm'
 import UpdateForm from './components/UpdateForm'
@@ -101,6 +101,7 @@ export default function App() {
                       console.log(sql);
                       //fetchJSON(connection.address, 'POST', sql);
                       //connectDatabase(connection.address);
+                      setModalData(prevState => ({ ...prevState, isVisible: false }));
                     }}/>)}
             >Create</Button>
             <Button variant='primary'>Alter</Button>
@@ -111,9 +112,9 @@ export default function App() {
                       //connectDatabase(connection.address);
                     }}/>)}>Drop</Button>
           </ButtonGroup>
-          <p></p>
-          <TableList tables={connection.tables} 
-                     onSelect={onTableRequested}
+          <TableSelectionForm tables={connection.tables} 
+                              defaultValue={connection.tables[0]}
+                              onSubmit={onTableRequested}
           />
 
           {tableData ? (
@@ -126,7 +127,11 @@ export default function App() {
                           //connectDatabase(connection.address);
                         }}/>)}
                 >Insert</Button>
-                <Button variant='primary' onClick={() => onControlClicked("Update data in a table", <UpdateForm table={tableData.name} onSubmit={sql => console.log(sql)}/>)}>Update</Button>
+                <Button variant='primary' 
+                        onClick={() => onControlClicked("Update data in a table", <UpdateForm table={tableData.name} columns={tableData.columns.map((col, index) => ({ typeIndex: tableData.column_types[index], value: col }))} onSubmit={sql => {
+                          console.log(sql);
+                        }}/>)}
+                >Update</Button>
                 <Button variant='danger' onClick={() => onControlClicked("Delete data from a table", <DeleteForm onSubmit={sql => console.log(sql)}/>)}>Delete</Button>
               </ButtonGroup>
 
@@ -134,13 +139,14 @@ export default function App() {
               <DataTable columns={tableData.columns} 
                          data={tableData.data}
               />
-              <ModalForm title={modalData.title}
-                         form={modalData.content ? modalData.content : <p>NULL</p>}
-                         isVisible={modalData.isVisible}
-                         onHide={() => setModalData(prevState => ({ ...prevState, isVisible: false }))}
-              />
             </div>
           ) : <></>}
+
+          <ModalForm title={modalData.title}
+                     form={modalData.content ? modalData.content : <p>NULL</p>}
+                     isVisible={modalData.isVisible}
+                     onHide={() => setModalData(prevState => ({ ...prevState, isVisible: false }))}
+          />
         </div>
       ) : (
         <Alert>Not connected to a database!</Alert>
