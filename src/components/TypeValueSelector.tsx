@@ -23,7 +23,7 @@ interface Props {
 /**
 * 
 */
-export function TypeValueControl({ types, defaultValue, onChange }: Props) {
+export function TypeValueSelector({ types, defaultValue, onChange }: Props) {
 
     const [data, setData] = useState<TypeValue>(defaultValue);
 

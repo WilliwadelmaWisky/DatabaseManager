@@ -1,7 +1,7 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
-import { TypeValueControl, TypeValue } from "./TypeValueControl";
+import { TypeValueSelector, TypeValue } from "./TypeValueSelector";
 
 /**
  * 
@@ -96,7 +96,7 @@ export default function CreateTableForm({ types, onSubmit }: Props) {
 
             <Form.Label>Columns</Form.Label>
             {formData.columns.map((_, index) => (
-                <TypeValueControl key={index} 
+                <TypeValueSelector key={index} 
                                   types={types}
                                   defaultValue={{typeIndex: 0, value: ""}}
                                   onChange={typeValue => onColumnChange(typeValue, index)}

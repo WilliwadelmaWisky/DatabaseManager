@@ -18,6 +18,7 @@ import DropTableForm from './components/DropTableForm'
 interface TableData {
   name: string,
   columns: string[],
+  column_types: number[], 
   data: string[][]
 }
 
@@ -27,12 +28,15 @@ interface ModalData {
   content: JSX.Element | null
 }
 
+/**
+ * 
+ */
 const TYPES = Object.freeze([ "INT", "VARCHAR" ]);
 
 /**
  * 
  */
-function App() {
+export default function App() {
 
   const [connection, connectDatabase] = useConnectDatabase();
   const [fetchJSON] = useFetchJSON();
@@ -67,6 +71,7 @@ function App() {
     setTableData({
       name: table,
       columns: data.columns,
+      column_types: (data.column_types as string[]).map(type => TYPES.indexOf(type)),
       data: data.data
     });
   };
@@ -94,16 +99,16 @@ function App() {
             <Button variant='primary' 
                     onClick={() => onControlClicked("Create a new table", <CreateTableForm types={TYPES} onSubmit={sql => {
                       console.log(sql);
-                      fetchJSON(connection.address, 'POST', sql);
-                      connectDatabase(connection.address);
+                      //fetchJSON(connection.address, 'POST', sql);
+                      //connectDatabase(connection.address);
                     }}/>)}
             >Create</Button>
             <Button variant='primary'>Alter</Button>
             <Button variant='danger' 
                     onClick={() => onControlClicked("Drop a table", <DropTableForm tables={connection.tables} onSubmit={sql => { 
                       console.log(sql); 
-                      fetchJSON(connection.address, 'POST', sql);
-                      connectDatabase(connection.address);
+                      //fetchJSON(connection.address, 'POST', sql);
+                      //connectDatabase(connection.address);
                     }}/>)}>Drop</Button>
           </ButtonGroup>
           <p></p>
@@ -114,7 +119,13 @@ function App() {
           {tableData ? (
             <div>
               <ButtonGroup>
-                <Button variant='primary' onClick={() => onControlClicked("Insert data to a table", <InsertIntoForm table={tableData.name} columns={[]} onSubmit={sql => console.log(sql)}/>)}>Insert</Button>
+                <Button variant='primary' 
+                        onClick={() => onControlClicked("Insert data to a table", <InsertIntoForm table={tableData.name} columns={tableData.columns.map((col, index) => ({ typeIndex: tableData.column_types[index], value: col }))} onSubmit={sql => {
+                          console.log(sql);
+                          //fetchJSON(connection.address, 'POST', sql);
+                          //connectDatabase(connection.address);
+                        }}/>)}
+                >Insert</Button>
                 <Button variant='primary' onClick={() => onControlClicked("Update data in a table", <UpdateForm table={tableData.name} onSubmit={sql => console.log(sql)}/>)}>Update</Button>
                 <Button variant='danger' onClick={() => onControlClicked("Delete data from a table", <DeleteForm onSubmit={sql => console.log(sql)}/>)}>Delete</Button>
               </ButtonGroup>
@@ -137,5 +148,3 @@ function App() {
     </div>
   );
 }
-
-export default App
